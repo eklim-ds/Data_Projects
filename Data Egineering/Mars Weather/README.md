@@ -6,6 +6,10 @@ It demonstrates a batch data pipeline end to end:
 
 **Batch ingestion API → object storage → dbt warehouse → dashboard**
 
+![Mars Surface Weather Desk dashboard](docs/dashboard.jpg)
+
+*The dashboard on the bundled sample data (`make demo`, then `make dashboard`).*
+
 ---
 
 ## 1. Business problem
