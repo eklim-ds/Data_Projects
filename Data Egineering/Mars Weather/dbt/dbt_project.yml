@@ -1,0 +1,26 @@
+name: mars_weather
+version: "1.0.0"
+config-version: 2
+profile: mars_weather
+
+model-paths: ["models"]
+test-paths: ["tests"]
+clean-targets: ["target", "logs"]
+
+models:
+  mars_weather:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+
+# Business rules live in config, not buried in SQL. These thresholds are ILLUSTRATIVE
+# (chosen from the spread of the InSight data) - a real ops team would tune them with engineers.
+vars:
+  # Wind-sensitive work (e.g. seismometer wind-shield placement, robotic-arm moves), in m/s:
+  ops_caution_avg_wind_ms: 7   # sol-average wind above this  -> CAUTION
+  ops_caution_gust_ms: 20      # highest wind sample above this -> CAUTION
+  ops_nogo_gust_ms: 25         # highest wind sample above this -> NO_GO
+  # A sensor needs this many of the 24 sol-hours with data to count as covered. Matches the
+  # API's own `sol_hours_required` rule, so a sol the API lists is complete by default.
+  min_sensor_hours: 18

@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Raw NASA InSight Mars Weather Service payloads, exactly as returned by the API, in the
+      object store (local directory standing in for a GCS/S3 bucket).
+    meta:
+      # dbt-duckdb reads the files straight from object storage: one row per landed file with
+      # columns (filename, content, size, last_modified). No load step, no copy.
+      external_location: "read_text('{{ env_var('LAKE_PATH', '../data/lake') }}/raw/insight_weather/dt=*/insight_weather_*.json')"
+    tables:
+      - name: insight_weather_files
+        description: >
+          One row per landed API response. `content` is the full JSON document. The same sol can
+          appear in many files because the API returns an overlapping rolling window of sols.
+        columns:
+          - name: filename
+            description: Object path; encodes the fetch timestamp (insight_weather_YYYYMMDDTHHMMSSZ.json).
+            tests:
+              - not_null
+              - unique
+          - name: content
+            description: Raw JSON response body.
+            tests:
+              - not_null

@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_insight__ingestion_files
+    description: One row per landed API response (batch run). Source for the pipeline-health audit.
+    columns:
+      - name: source_file
+        tests: [not_null, unique]
+      - name: ingested_at
+        description: Fetch time (UTC) parsed from the object name.
+        tests: [not_null]
+
+  - name: stg_insight__sol_payloads
+    description: >
+      One row per sol: the most recently landed copy (latest wins) of that sol's JSON. Turns the
+      API's dynamic keys into rows and removes duplicates caused by the overlapping window.
+    columns:
+      - name: sol
+        description: Martian day number since the InSight landing.
+        tests: [not_null, unique]
+      - name: sol_json
+        tests: [not_null]
+      - name: times_ingested
+        description: How many landed files contained this sol.
+
+  - name: stg_insight__sol_readings
+    description: Typed, one-row-per-sol weather readings. Units are the API's (°C, m/s, Pa).
+    columns:
+      - name: sol
+        tests: [not_null, unique]
+      - name: first_utc
+        tests: [not_null]
+
+  - name: stg_insight__wind_direction
+    description: Wind rose, one row per sol and compass bin (16 bins), missing bins filled with 0.
+    columns:
+      - name: sol
+        tests: [not_null]
+      - name: direction_bin
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+      - name: sample_count
+        tests: [not_null]

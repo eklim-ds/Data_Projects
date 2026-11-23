@@ -1,0 +1,17 @@
+version: 2
+
+seeds:
+  - name: compass_bins
+    description: >
+      Static reference: the 16 compass bins used by the InSight wind-direction histogram
+      (bin index -> compass point -> degrees clockwise from north).
+    config:
+      column_types:
+        direction_bin: integer
+        compass_point: varchar
+        compass_degrees: double
+    columns:
+      - name: direction_bin
+        tests: [not_null, unique]
+      - name: compass_point
+        tests: [not_null, unique]

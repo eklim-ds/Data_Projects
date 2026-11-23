@@ -1,0 +1,17 @@
+# Versions below were tested together on Python 3.10 (see README "Tested with").
+# Ranges are intentionally loose; use `pip install -c requirements.lock -r requirements.txt` to reproduce exactly.
+
+# ingestion
+requests>=2.31
+
+# warehouse (dbt Core + DuckDB adapter; DuckDB also serves the dashboard)
+dbt-duckdb>=1.11,<2
+duckdb>=1.1
+
+# dashboard
+streamlit>=1.50          # `width="stretch"` replaces the deprecated use_container_width
+plotly>=5.24
+pandas>=2.0
+
+# tests
+pytest>=8

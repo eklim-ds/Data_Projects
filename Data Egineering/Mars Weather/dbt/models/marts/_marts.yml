@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: fct_sol_weather
+    description: >
+      Trusted daily (per-sol) Mars weather at Elysium Planitia from the InSight lander.
+      Grain: one row per sol. Temperatures in °C, wind in m/s, pressure in Pa.
+    columns:
+      - name: sol
+        description: Martian day number.
+        tests: [not_null, unique]
+      - name: earth_date
+        description: Earth calendar date (UTC) on which the sol started.
+        tests: [not_null]
+      - name: is_complete
+        description: True when every sensor covered enough of the sol and headline stats exist.
+        tests: [not_null]
+      - name: temp_range_c
+        description: Daily max minus min air temperature.
+
+  - name: mart_ops_briefing
+    description: >
+      Daily GO / CAUTION / NO_GO call for wind-sensitive surface work, with the reason in plain
+      words and 7-sol rolling context. Thresholds are dbt vars and are illustrative.
+    columns:
+      - name: sol
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('fct_sol_weather')
+                field: sol
+      - name: ops_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [GO, CAUTION, NO_GO, NO_DATA]
+      - name: ops_status_reason
+        tests: [not_null]
+      - name: limit_nogo_gust_ms
+        description: The no-go gust limit in force (from the dbt var), exposed so dashboards chart the same threshold.
+        tests: [not_null]
+
+  - name: fct_sol_wind_rose
+    description: Wind rose per sol, 16 compass bins; share_of_samples sums to 1 per sol.
+    columns:
+      - name: sol
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_sol_weather')
+                field: sol
+      - name: direction_bin
+        tests: [not_null]
+      - name: share_of_samples
+        tests: [not_null]
+
+  - name: mart_ingestion_audit
+    description: >
+      Pipeline health, one row per batch run: sols returned vs. new vs. repeated. Explains why
+      de-duplication is needed and shows when the upstream feed stops producing new data.
+    columns:
+      - name: source_file
+        tests: [not_null, unique]
+      - name: new_sols
+        tests: [not_null]

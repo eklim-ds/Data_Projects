@@ -1,0 +1,12 @@
+config:
+  send_anonymous_usage_stats: false
+
+mars_weather:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # Paths are relative to where dbt runs (the dbt/ folder); the Makefile and tests
+      # override them through environment variables.
+      path: "{{ env_var('WAREHOUSE_PATH', '../data/warehouse/mars_weather.duckdb') }}"
+      threads: 1
